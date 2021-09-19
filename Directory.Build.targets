@@ -1,5 +1,5 @@
 <Project>
-  <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec" DependsOnTargets="GetBuildVersion">
+  <!--<Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec" DependsOnTargets="GetBuildVersion">
     <PropertyGroup>
       <NuspecProperties>$(NuspecProperties);config=$(Configuration)</NuspecProperties>
       <NuspecProperties>$(NuspecProperties);version=$(NuGetPackageVersion)</NuspecProperties>
@@ -19,5 +19,5 @@
       <GeneratedNupkgs Include="$(PackageOutputAbsolutePath)\*.nupkg"/>
     </ItemGroup>
     <Copy SourceFiles="@(GeneratedNupkgs)" DestinationFolder="$(SolutionDir)GeneratedNuGetPackages\$(Configuration)" />
-  </Target>
+  </Target>-->
 </Project>
