@@ -47,9 +47,11 @@ namespace Capnp
             return thisDict.Remove(key);
         }
 #else
+#pragma warning disable CS8601
 #pragma warning disable CS8714
         public static bool ReplacementTryRemove<K, V>(this Dictionary<K, V> thisDict, K key, out V value) => thisDict.Remove(key, out value);
 #pragma warning restore CS8714
+#pragma warning restore CS8601
 #endif
 
         /// <summary>
