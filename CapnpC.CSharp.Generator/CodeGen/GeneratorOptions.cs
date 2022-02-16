@@ -184,6 +184,6 @@
         /// <summary>
         /// Generator tool version for GeneratedCodeAttribute
         /// </summary>
-        public string GeneratorToolVersion = ThisAssembly.AssemblyVersion;
+        public string GeneratorToolVersion = "0.0";
     }
 }

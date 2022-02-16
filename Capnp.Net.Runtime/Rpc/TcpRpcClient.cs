@@ -11,6 +11,32 @@ using System.Threading.Tasks;
 namespace Capnp.Rpc
 {
     /// <summary>
+    /// State of Variable has changed
+    /// </summary>
+    public delegate void StateChanged();
+
+    /// <summary>
+    /// ConnectionState has changed EventArgs
+    /// </summary>
+    public class ConnectionStateEventArgs : EventArgs
+    {
+        /// <summary>
+        /// New State of Connection
+        /// </summary>
+        public ConnectionState NewState { get; set; }
+
+        /// <summary>
+        /// Last State of Connection
+        /// </summary>
+        public ConnectionState LastState { get; set; }
+    }
+
+    /// <summary>
+    /// ConnectionState EventHandler
+    /// </summary>
+    public delegate void ConnectionStateEventHandler(Object sender, ConnectionStateEventArgs e);
+
+    /// <summary>
     /// TCP-based RPC implementation which will establish a connection to a TCP server implementing 
     /// the Cap'n Proto RPC protocol.
     /// </summary>
@@ -131,11 +157,17 @@ namespace Capnp.Rpc
         /// <summary>
         /// Constructs an instance but does not yet attempt to connect.
         /// </summary>
-        public TcpRpcClient()
+        /// <param name="receiveTimeout">The time-out value of the connection in milliseconds.</param>
+        /// <param name="sendTimeout">The send time-out value, in milliseconds.</param>
+        public TcpRpcClient(int receiveTimeout = 0, int sendTimeout = 0)
         {
             _rpcEngine = new RpcEngine();
-            _client = new TcpClient();
-            _client.ExclusiveAddressUse = false;
+            _client = new TcpClient
+            {
+                ExclusiveAddressUse = false,
+                ReceiveTimeout = receiveTimeout,
+                SendTimeout = sendTimeout
+            };
         }
 
         /// <summary>
@@ -251,9 +283,40 @@ namespace Capnp.Rpc
         }
 
         /// <summary>
+        /// State of Connection has changed
+        /// </summary>
+        public event ConnectionStateEventHandler? ConnectionStateChanged;
+
+        /// <summary>
+        /// On ConnectionState changed
+        /// </summary>
+        protected virtual void OnConnectionStateChanged(ConnectionStateEventArgs e)
+        {
+            ConnectionStateChanged?.Invoke(this, e);
+        }
+
+        private ConnectionState _State = ConnectionState.Initializing;
+
+        /// <summary>
         /// Returns the state of this connection.
         /// </summary>
-        public ConnectionState State { get; private set; } = ConnectionState.Initializing;
+        public ConnectionState State { 
+            get
+            {
+                return _State;
+            }
+            private set
+            {
+                ConnectionStateEventArgs args = new ConnectionStateEventArgs()
+                {
+                    LastState = _State,
+                    NewState = value
+                };
+                _State = value;
+
+                OnConnectionStateChanged(args);
+            }
+        } 
 
         /// <summary>
         /// Gets the number of RPC protocol messages sent by this client so far.
