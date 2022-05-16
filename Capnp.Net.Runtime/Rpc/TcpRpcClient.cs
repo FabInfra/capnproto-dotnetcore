@@ -1,4 +1,4 @@
-﻿using Capnp.FrameTracing;
+using Capnp.FrameTracing;
 using Capnp.Util;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,31 +10,11 @@ using System.Threading.Tasks;
 
 namespace Capnp.Rpc
 {
-    /// <summary>
-    /// State of Variable has changed
-    /// </summary>
-    public delegate void StateChanged();
-
-    /// <summary>
-    /// ConnectionState has changed EventArgs
-    /// </summary>
-    public class ConnectionStateEventArgs : EventArgs
+    public class ConnectionStateChange
     {
-        /// <summary>
-        /// New State of Connection
-        /// </summary>
         public ConnectionState NewState { get; set; }
-
-        /// <summary>
-        /// Last State of Connection
-        /// </summary>
         public ConnectionState LastState { get; set; }
     }
-
-    /// <summary>
-    /// ConnectionState EventHandler
-    /// </summary>
-    public delegate void ConnectionStateEventHandler(Object sender, ConnectionStateEventArgs e);
 
     /// <summary>
     /// TCP-based RPC implementation which will establish a connection to a TCP server implementing 
@@ -285,15 +265,7 @@ namespace Capnp.Rpc
         /// <summary>
         /// State of Connection has changed
         /// </summary>
-        public event ConnectionStateEventHandler? ConnectionStateChanged;
-
-        /// <summary>
-        /// On ConnectionState changed
-        /// </summary>
-        protected virtual void OnConnectionStateChanged(ConnectionStateEventArgs e)
-        {
-            ConnectionStateChanged?.Invoke(this, e);
-        }
+        public event EventHandler<ConnectionStateChange> ConnectionStateChanged;
 
         private ConnectionState _State = ConnectionState.Initializing;
 
@@ -307,14 +279,18 @@ namespace Capnp.Rpc
             }
             private set
             {
-                ConnectionStateEventArgs args = new ConnectionStateEventArgs()
+                ConnectionStateChange args = new ConnectionStateChange()
                 {
                     LastState = _State,
                     NewState = value
                 };
                 _State = value;
 
-                OnConnectionStateChanged(args);
+                EventHandler<ConnectionStateChange> eventHandler = ConnectionStateChanged;
+                if(eventHandler != null)
+                {
+                    eventHandler(this, args);
+                }
             }
         } 
 
