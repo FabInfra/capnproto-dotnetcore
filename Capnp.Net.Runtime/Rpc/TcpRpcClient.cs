@@ -10,9 +10,18 @@ using System.Threading.Tasks;
 
 namespace Capnp.Rpc
 {
+    /// <summary>
+    /// ConnectionStateChange of TcpClient
+    /// </summary>
     public class ConnectionStateChange
     {
+        /// <summary>
+        /// New State of TcpClient
+        /// </summary>
         public ConnectionState NewState { get; set; }
+        /// <summary>
+        /// Last State of TcpClient
+        /// </summary>
         public ConnectionState LastState { get; set; }
     }
 
