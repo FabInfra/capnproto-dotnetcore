@@ -4,6 +4,6 @@
     <PackageReference Include="Nerdbank.GitVersioning">
       <Version>3.4.240</Version>
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>-->
+    </PackageReference>
   </ItemGroup>
 </Project>
