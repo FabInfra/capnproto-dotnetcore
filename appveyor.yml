@@ -9,8 +9,10 @@ install:
   - cd c:\tools\vcpkg
   - vcpkg integrate install
   - vcpkg install capnproto
+  - set PATH_COPY=%PATH%
+  - set PATH=%PATH%;c:\tools\vcpkg\installed\x86-windows\tools\capnproto
   - cd %APPVEYOR_BUILD_FOLDER%
-  - dotnet tool install -g nbgv
+  - dotnet tool install -g nbgv --version 3.4.240
   - choco install reportgenerator.portable --version=4.5.6 --force -y
   - dotnet tool install -g coveralls.net --version 1.0.0
 init:
@@ -32,10 +34,10 @@ before_build:
   - cmd: dotnet restore ./CapnpC.CSharp.MsBuild.Generation.Tests/CapnpC.CSharp.MsBuild.Generation.Tests.csproj --verbosity m  
   - cmd: dotnet restore ./capnpc-csharp/capnpc-csharp.csproj --verbosity m  
 build_script:
-  - cmd: msbuild ./Capnp.Net.sln /p:Configuration="Debug"
-  - cmd: msbuild ./Capnp.Net.sln /p:Configuration="Release"
-  - cmd: msbuild ./CapnpCompatTest.sln /p:Configuration="Debug"
-  - cmd: msbuild ./CapnpCompatTest.sln /p:Configuration="Release"
+  - cmd: msbuild ./Capnp.Net.sln /p:Configuration="Debug" -V:m
+  - cmd: msbuild ./Capnp.Net.sln /p:Configuration="Release" -V:m
+  - cmd: msbuild ./CapnpCompatTest.sln /p:Configuration="Debug" -V:m
+  - cmd: msbuild ./CapnpCompatTest.sln /p:Configuration="Release" -V:m
   - ps: scripts\capnpc-csharp-pack.ps1
 after_build:
   # For once the build has completed
@@ -60,10 +62,9 @@ artifacts:
    type: zip
 test_script:
   - cmd: |
-      nbgv get-version -v NuGetPackageVersion >> version.txt
-      set /P VERSION=< version.txt
+      nbgv get-version -v NuGetPackageVersion >> myversion.txt
+      set /P VERSION=< myversion.txt
       vstest.console /logger:Appveyor /inIsolation CapnpC.CSharp.Generator.Tests\bin\Release\netcoreapp3.1\CapnpC.CSharp.Generator.Tests.dll
-      choco install capnproto --source="https://chocolatey.org/api/v2" --force -y
       cd %APPVEYOR_BUILD_FOLDER%\capnpc-csharp
       dotnet tool install --global --add-source ./nupkg capnpc-csharp --version %VERSION%
       cd %APPVEYOR_BUILD_FOLDER%\install-test
@@ -74,6 +75,7 @@ test_script:
       cd %APPVEYOR_BUILD_FOLDER%\install-test
       notinstalled-test
       cd %APPVEYOR_BUILD_FOLDER%\chocolatey\install
+      choco install capnproto --source="https://chocolatey.org/api/v2" --force -y
       choco install capnpc-csharp-win-x86 --source=".;https://chocolatey.org/api/v2" --force -y --version %VERSION% --pre
       cd %APPVEYOR_BUILD_FOLDER%\install-test
       compile-test
