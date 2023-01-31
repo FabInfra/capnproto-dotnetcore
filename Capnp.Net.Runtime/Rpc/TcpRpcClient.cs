@@ -274,7 +274,7 @@ namespace Capnp.Rpc
         /// <summary>
         /// State of Connection has changed
         /// </summary>
-        public event EventHandler<ConnectionStateChange> ConnectionStateChanged;
+        public event EventHandler<ConnectionStateChange>? ConnectionStateChanged;
 
         private ConnectionState _State = ConnectionState.Initializing;
 
@@ -295,13 +295,9 @@ namespace Capnp.Rpc
                 };
                 _State = value;
 
-                EventHandler<ConnectionStateChange> eventHandler = ConnectionStateChanged;
-                if(eventHandler != null)
-                {
-                    eventHandler(this, args);
-                }
+                ConnectionStateChanged?.Invoke(this, args);
             }
-        } 
+        }
 
         /// <summary>
         /// Gets the number of RPC protocol messages sent by this client so far.
